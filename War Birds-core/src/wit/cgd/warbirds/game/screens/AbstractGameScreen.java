@@ -6,11 +6,13 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 
-public abstract class AbstractGameScreen implements Screen {
+public abstract class AbstractGameScreen implements Screen
+{
 
-	protected Game	game;
+	protected Game game;
 
-	public AbstractGameScreen(Game game) {
+	public AbstractGameScreen(Game game)
+	{
 		this.game = game;
 	}
 
@@ -24,11 +26,13 @@ public abstract class AbstractGameScreen implements Screen {
 
 	public abstract void pause();
 
-	public void resume() {
+	public void resume()
+	{
 		Assets.instance.init(new AssetManager());
 	}
 
-	public void dispose() {
+	public void dispose()
+	{
 		Assets.instance.dispose();
 	}
 

@@ -12,28 +12,31 @@ import wit.cgd.warbirds.game.objects.Level;
 import wit.cgd.warbirds.game.util.CameraHelper;
 import wit.cgd.warbirds.game.util.Constants;
 
-public class WorldController extends InputAdapter {
+public class WorldController extends InputAdapter
+{
 
-	private static final String	TAG	= WorldController.class.getName();
+	private static final String TAG = WorldController.class.getName();
 
-	private Game				game;
-	public CameraHelper			cameraHelper;
-	public Level				level;
+	private Game game;
+	public CameraHelper cameraHelper;
+	public Level level;
 
-	public WorldController(Game game) {
+	public WorldController(Game game)
+	{
 		this.game = game;
 		init();
 	}
 
-	private void init() {
+	private void init()
+	{
 		Gdx.input.setInputProcessor(this);
 		level = new Level();
 		cameraHelper = new CameraHelper();
 		cameraHelper.setTarget(level);
 	}
 
-
-	public void update(float deltaTime) {
+	public void update(float deltaTime)
+	{
 		handleDebugInput(deltaTime);
 		handleGameInput(deltaTime);
 		cameraHelper.update(deltaTime);
@@ -45,74 +48,100 @@ public class WorldController extends InputAdapter {
 	}
 
 	/**
-	 * Remove object because they are out of screen bounds or because they have died
+	 * Remove object because they are out of screen bounds or because they have
+	 * died
 	 */
-	public void cullObjects() {
-		
-		// cull bullets 
-		for (int k=level.bullets.size; --k>=0; ) { 	// traverse array backwards !!!
+	public void cullObjects()
+	{
+
+		// cull bullets
+		for (int k = level.bullets.size; --k >= 0;)
+		{ // traverse array backwards !!!
 			Bullet it = level.bullets.get(k);
-			if (it.state == Bullet.State.DEAD) {
+			if (it.state == Bullet.State.DEAD)
+			{
 				level.bullets.removeIndex(k);
 				level.bulletPool.free(it);
-			} else if (it.state==Bullet.State.ACTIVE && !isInScreen(it)) {
+			}
+			else if (it.state == Bullet.State.ACTIVE && !isInScreen(it))
+			{
 				it.state = Bullet.State.DYING;
 				it.timeToDie = Constants.BULLET_DIE_DELAY;
 			}
 		}
-		
+
 		// TODO cull enemies
 	}
 
 	// Collision detection methods
-	public void checkBulletEnemyCollision() {}
-	public void checkEnemyBulletPlayerCollision() {}
-	public void checkEnemyPlayerCollision() {}
-	
+	public void checkBulletEnemyCollision()
+	{}
 
-	public boolean isInScreen(AbstractGameObject obj) {
-		return ((obj.position.x>=-Constants.VIEWPORT_WIDTH/2 && obj.position.x<=Constants.VIEWPORT_WIDTH/2)
-				&&
-				(obj.position.y>=level.start && obj.position.y<=level.end));
+	public void checkEnemyBulletPlayerCollision()
+	{}
+
+	public void checkEnemyPlayerCollision()
+	{}
+
+	public boolean isInScreen(AbstractGameObject obj)
+	{
+		return ((obj.position.x >= -Constants.VIEWPORT_WIDTH / 2 && obj.position.x <= Constants.VIEWPORT_WIDTH / 2) && (obj.position.y >= level.start && obj.position.y <= level.end));
 	}
-	
+
 	@Override
-	public boolean keyUp(int keycode) {
-		if (keycode == Keys.ESCAPE || keycode == Keys.BACK) {
+	public boolean keyUp(int keycode)
+	{
+		if (keycode == Keys.ESCAPE || keycode == Keys.BACK)
+		{
 			Gdx.app.exit();
 		}
 		return false;
 	}
 
-	private void handleGameInput(float deltaTime) {
+	private void handleGameInput(float deltaTime)
+	{
 
-		if (Gdx.input.isKeyPressed(Keys.A)) {
+		if (Gdx.input.isKeyPressed(Keys.A))
+		{
 			level.player.velocity.x = -Constants.PLANE_H_SPEED;
-		} else if (Gdx.input.isKeyPressed(Keys.D)) {
+		}
+		else if (Gdx.input.isKeyPressed(Keys.D))
+		{
 			level.player.velocity.x = Constants.PLANE_H_SPEED;
-		} else {
+		}
+		else
+		{
 			level.player.velocity.x = 0;
 		}
-		if (Gdx.input.isKeyPressed(Keys.W)) {
+		if (Gdx.input.isKeyPressed(Keys.W))
+		{
 			level.player.velocity.y = Constants.PLANE_MAX_V_SPEED;
-		} else if (Gdx.input.isKeyPressed(Keys.S)) {
+		}
+		else if (Gdx.input.isKeyPressed(Keys.S))
+		{
 			level.player.velocity.y = Constants.PLANE_MIN_V_SPEED;
-		} else {
+		}
+		else
+		{
 			level.player.velocity.y = Constants.SCROLL_SPEED;
 		}
-		if (Gdx.input.isKeyPressed(Keys.SPACE)) {
+		if (Gdx.input.isKeyPressed(Keys.SPACE))
+		{
 			level.player.shoot();
 		}
 	}
 
-	private void handleDebugInput(float deltaTime) {
+	private void handleDebugInput(float deltaTime)
+	{
 		if (Gdx.app.getType() != ApplicationType.Desktop) return;
 
-		if (Gdx.input.isKeyPressed(Keys.ENTER)) {
+		if (Gdx.input.isKeyPressed(Keys.ENTER))
+		{
 			cameraHelper.setTarget(!cameraHelper.hasTarget() ? level : null);
 		}
 
-		if (!cameraHelper.hasTarget()) {
+		if (!cameraHelper.hasTarget())
+		{
 			// Camera Controls (move)
 			float camMoveSpeed = 5 * deltaTime;
 			float camMoveSpeedAccelerationFactor = 5;
@@ -133,14 +162,16 @@ public class WorldController extends InputAdapter {
 		if (Gdx.input.isKeyPressed(Keys.SLASH)) cameraHelper.setZoom(1);
 	}
 
-	private void moveCamera(float x, float y) {
+	private void moveCamera(float x, float y)
+	{
 		x += cameraHelper.getPosition().x;
 		y += cameraHelper.getPosition().y;
 		cameraHelper.setPosition(x, y);
 	}
 
 	@Override
-	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+	public boolean touchDown(int screenX, int screenY, int pointer, int button)
+	{
 
 		// TODO - implement touch pad type controls
 		return true;

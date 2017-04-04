@@ -16,26 +16,29 @@ import com.badlogic.gdx.utils.Disposable;
 
 import wit.cgd.warbirds.game.util.Constants;
 
-public class Assets implements Disposable, AssetErrorListener {
+public class Assets implements Disposable, AssetErrorListener
+{
 
-	public static final String	TAG			= Assets.class.getName();
-	public static final Assets	instance	= new Assets();
+	public static final String TAG = Assets.class.getName();
+	public static final Assets instance = new Assets();
 
-	private AssetManager		assetManager;
+	private AssetManager assetManager;
 
-	public AssetFonts			fonts;
+	public AssetFonts fonts;
 
-	public AssetSounds			sounds;
-	public AssetMusic			music;
+	public AssetSounds sounds;
+	public AssetMusic music;
 
-	public AssetPlayer			player;
-	public Asset				bullet;
-	public Asset				doubleBullet;
-	public AssetLevelDecoration	levelDecoration;
+	public AssetPlayer player;
+	public Asset bullet;
+	public Asset doubleBullet;
+	public AssetLevelDecoration levelDecoration;
 
-	private Assets() {}
+	private Assets()
+	{}
 
-	public void init(AssetManager assetManager) {
+	public void init(AssetManager assetManager)
+	{
 
 		this.assetManager = assetManager;
 		assetManager.setErrorListener(this);
@@ -50,7 +53,6 @@ public class Assets implements Disposable, AssetErrorListener {
 		// assetManager.load("music/FILENAME", Music.class);
 
 		assetManager.finishLoading();
-
 
 		Gdx.app.debug(TAG, "# of assets loaded: " + assetManager.getAssetNames().size);
 		for (String a : assetManager.getAssetNames())
@@ -67,8 +69,8 @@ public class Assets implements Disposable, AssetErrorListener {
 		player = new AssetPlayer(atlas);
 		levelDecoration = new AssetLevelDecoration(atlas);
 		bullet = new Asset(atlas, "bullet");
-		doubleBullet  = new Asset(atlas, "bullet_double");
-		
+		doubleBullet = new Asset(atlas, "bullet_double");
+
 		// create sound and music resource objects
 		sounds = new AssetSounds(assetManager);
 		music = new AssetMusic(assetManager);
@@ -76,30 +78,36 @@ public class Assets implements Disposable, AssetErrorListener {
 	}
 
 	@Override
-	public void dispose() {
+	public void dispose()
+	{
 		assetManager.dispose();
 	}
 
 	@Override
-	public void error(AssetDescriptor asset, Throwable throwable) {
+	public void error(AssetDescriptor asset, Throwable throwable)
+	{
 		Gdx.app.error(TAG, "Couldn't load asset '" + asset + "'", (Exception) throwable);
 	}
 
-	public class Asset {
-		public final AtlasRegion	region;
+	public class Asset
+	{
+		public final AtlasRegion region;
 
-		public Asset(TextureAtlas atlas, String imageName) {
+		public Asset(TextureAtlas atlas, String imageName)
+		{
 			region = atlas.findRegion(imageName);
 			Gdx.app.log(TAG, "Loaded asset '" + imageName + "'");
 		}
 	}
 
-	public class AssetPlayer {
-		public final AtlasRegion	region;
-		public final Animation		animationNormal;
-		public final Animation		animationExplosionBig;
+	public class AssetPlayer
+	{
+		public final AtlasRegion region;
+		public final Animation animationNormal;
+		public final Animation animationExplosionBig;
 
-		public AssetPlayer(TextureAtlas atlas) {
+		public AssetPlayer(TextureAtlas atlas)
+		{
 			region = atlas.findRegion("player");
 
 			Array<AtlasRegion> regions = atlas.findRegions("player");
@@ -109,14 +117,16 @@ public class Assets implements Disposable, AssetErrorListener {
 		}
 	}
 
-	public class AssetLevelDecoration {
+	public class AssetLevelDecoration
+	{
 
-		public final AtlasRegion	islandBig;
-		public final AtlasRegion	islandSmall;
-		public final AtlasRegion	islandTiny;
-		public final AtlasRegion	water;
+		public final AtlasRegion islandBig;
+		public final AtlasRegion islandSmall;
+		public final AtlasRegion islandTiny;
+		public final AtlasRegion water;
 
-		public AssetLevelDecoration(TextureAtlas atlas) {
+		public AssetLevelDecoration(TextureAtlas atlas)
+		{
 			water = atlas.findRegion("water");
 			islandBig = atlas.findRegion("island_big");
 			islandSmall = atlas.findRegion("island_small");
@@ -124,12 +134,14 @@ public class Assets implements Disposable, AssetErrorListener {
 		}
 	}
 
-	public class AssetFonts {
-		public final BitmapFont	defaultSmall;
-		public final BitmapFont	defaultNormal;
-		public final BitmapFont	defaultBig;
+	public class AssetFonts
+	{
+		public final BitmapFont defaultSmall;
+		public final BitmapFont defaultNormal;
+		public final BitmapFont defaultBig;
 
-		public AssetFonts() {
+		public AssetFonts()
+		{
 			// create three fonts using Libgdx's built-in 15px bitmap font
 			defaultSmall = new BitmapFont(Gdx.files.internal("images/arial-15.fnt"), true);
 			defaultNormal = new BitmapFont(Gdx.files.internal("images/arial-15.fnt"), true);
@@ -145,22 +157,26 @@ public class Assets implements Disposable, AssetErrorListener {
 		}
 	}
 
-	public class AssetSounds {
+	public class AssetSounds
+	{
 
 		// TODO list reference to sound assets
 		// public final Sound first;
 
-		public AssetSounds(AssetManager am) {
-			// TODO 
+		public AssetSounds(AssetManager am)
+		{
+			// TODO
 			// first = am.get("sounds/FILENAME", Sound.class);
 		}
 	}
 
-	public class AssetMusic {
+	public class AssetMusic
+	{
 		// TODO list reference to music assets
 		// public final Music song01;
 
-		public AssetMusic(AssetManager am) {
+		public AssetMusic(AssetManager am)
+		{
 			// TODO
 			// song01 = am.get("music/FILENAME", Music.class);
 		}

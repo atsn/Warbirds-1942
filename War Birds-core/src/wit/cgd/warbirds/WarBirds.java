@@ -13,10 +13,12 @@ import wit.cgd.warbirds.game.Assets;
 import wit.cgd.warbirds.game.screens.GameScreen;
 import wit.cgd.warbirds.game.util.GamePreferences;
 
-public class WarBirds extends Game {
+public class WarBirds extends Game
+{
 
 	@Override
-	public void create() {
+	public void create()
+	{
 
 		// Set Libgdx log level
 		Gdx.app.setLogLevel(Application.LOG_DEBUG);
@@ -24,9 +26,9 @@ public class WarBirds extends Game {
 		// Load assets
 		Assets.instance.init(new AssetManager());
 
-		// Load preferences for audio settings 
+		// Load preferences for audio settings
 		GamePreferences.instance.load();
-		
+
 		// TODO start playing music
 		// AudioManager.instance.play(Assets.instance.music.song01);
 
