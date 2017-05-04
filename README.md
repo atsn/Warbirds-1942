@@ -1,6 +1,4 @@
-+#Bunny Hop
-+
-+
++#Warbirds/1942 remake
 +**I want to make it clear that i have not made this game from the bottom**
 +I started with a version where the only thing happening was the plain flying and some island the rest i have added. 
 +You can see the original game as my first commit
