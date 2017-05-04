@@ -4,14 +4,13 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 
-import jdk.internal.org.objectweb.asm.Handle;
+import wit.cgd.warbirds.game.Assets;
 import wit.cgd.warbirds.game.WorldController;
 import wit.cgd.warbirds.game.WorldRenderer;
+import wit.cgd.warbirds.game.util.AudioManager;
 
 public class GameScreen extends AbstractGameScreen
 {
-
-	private static final String TAG = GameScreen.class.getName();
 
 	private WorldController worldController;
 	private WorldRenderer worldRenderer;
@@ -21,6 +20,7 @@ public class GameScreen extends AbstractGameScreen
 	public GameScreen(Game game)
 	{
 		super(game);
+		AudioManager.instance.play(Assets.instance.music.gamemusic);
 	}
 
 	@Override

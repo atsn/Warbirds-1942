@@ -1,0 +1,8 @@
+{
+	islandseed: 2599,
+		enemies: [	
+	],
+	name: 5,
+	length: 5,
+	hasboss: true,
+}

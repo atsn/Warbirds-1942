@@ -1,13 +1,18 @@
 {
-	// probably better to construct islands using a random formula (ie proceduraly generated)  but this
-	// is here to show how it could be done manually.
-	islands: [
-		{	name: islandBig,		x:   -3,		y:   -4,	rotation:  0, state:	0},
-		{	name: islandSmall,		x:    4,		y:    1,	rotation:  0, state:	0},
-		{	name: islandTiny,		x:   -2,		y:    5,	rotation: 90, state:	0},
-	],
-	enemies: [
+	// all green and yellow enemy´s must be spawn between x -4 and x 3.
+	islandseed: 965,
+		enemies: [		
+		{	name: whiteEnemy,	x: -4,	y: 11,	rotation:  0, state:	0},
+		{	name: whiteEnemy,	x: -3,	y: 11,	rotation:  0, state:	0},
+		{	name: whiteEnemy,	x: -2,	y: 11,	rotation:  0, state:	0},
+		{	name: whiteEnemy,	x: -1,	y: 11,	rotation:  0, state:	0},
+		{	name: whiteEnemy,	x: 0,	y: 11,	rotation:  0, state:	0},
+		{	name: whiteEnemy,	x: 0,	y: 05,	rotation:  0, state:	0},
+		{	name: whiteEnemy,	x: 1,	y: 05,	rotation:  0, state:	0},
+		{	name: whiteEnemy,	x: 2,	y: 05,	rotation:  0, state:	0},
+		{	name: whiteEnemy,	x: 3,	y: 05,	rotation:  0, state:	0},		
 	],
 	name: 1,
-	length: 10,
+	length: 15,
+	hasboss: false,
 }

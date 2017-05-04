@@ -1,0 +1,83 @@
+
+ui.png
+size: 512,1024
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+background
+  rotate: false
+  xy: 2, 220
+  size: 480, 800
+  orig: 480, 800
+  offset: 0, 0
+  index: -1
+cancel-dn
+  rotate: false
+  xy: 375, 189
+  size: 115, 29
+  orig: 115, 29
+  offset: 0, 0
+  index: -1
+cancel-up
+  rotate: false
+  xy: 375, 158
+  size: 115, 29
+  orig: 115, 29
+  offset: 0, 0
+  index: -1
+options-dn
+  rotate: false
+  xy: 2, 78
+  size: 371, 44
+  orig: 371, 44
+  offset: 0, 0
+  index: -1
+options-up
+  rotate: false
+  xy: 2, 32
+  size: 371, 44
+  orig: 371, 44
+  offset: 0, 0
+  index: -1
+play-dn
+  rotate: false
+  xy: 2, 172
+  size: 371, 46
+  orig: 371, 46
+  offset: 0, 0
+  index: -1
+play-up
+  rotate: false
+  xy: 2, 124
+  size: 371, 46
+  orig: 371, 46
+  offset: 0, 0
+  index: -1
+reset-dn
+  rotate: false
+  xy: 2, 2
+  size: 209, 28
+  orig: 209, 28
+  offset: 0, 0
+  index: -1
+reset-up
+  rotate: false
+  xy: 213, 2
+  size: 209, 28
+  orig: 209, 28
+  offset: 0, 0
+  index: -1
+save-dn
+  rotate: false
+  xy: 375, 128
+  size: 115, 28
+  orig: 115, 28
+  offset: 0, 0
+  index: -1
+save-up
+  rotate: false
+  xy: 375, 98
+  size: 115, 28
+  orig: 115, 28
+  offset: 0, 0
+  index: -1

@@ -2,13 +2,15 @@ package wit.cgd.warbirds.game;
 
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Disposable;
+
 import wit.cgd.warbirds.game.util.Constants;
+import wit.cgd.warbirds.game.util.GameStats;
 
 public class WorldRenderer implements Disposable
 {
-
-	private static final String TAG = WorldRenderer.class.getName();
 
 	public OrthographicCamera camera;
 	public OrthographicCamera cameraGUI;
@@ -64,7 +66,56 @@ public class WorldRenderer implements Disposable
 		batch.setProjectionMatrix(cameraGUI.combined);
 		batch.begin();
 		// TODO
+		renderGui(batch);
+		renderendmesseges(batch);
 		batch.end();
+	}
+
+	private void renderGui(SpriteBatch batch)
+	{
+		float x = -15;
+		float y = -15;
+		Assets.instance.fonts.myFontMedium.draw(batch, "" + GameStats.instance.lastscore, x + 75, y + 37);
+		
+		float x1 = -15;
+		float y1 = 60;
+		
+		TextureRegion region = Assets.instance.player.region;
+		batch.draw(region, 35+75, y1+37);
+		
+		Assets.instance.fonts.myFontMedium.draw(batch, "" + worldController.lives, x1 + 75, y1 + 45);
+	}
+
+	public void renderendmesseges(SpriteBatch batch)
+	{
+
+		float x = cameraGUI.position.x;
+		float y = cameraGUI.position.y;
+		
+		if (worldController.isgameover())
+		{
+		 Assets.instance.fonts.gameoverbig.draw(batch, "GAME OVER", x, y, 0, Align.center, true);
+		}
+		
+		if (worldController.levelJustStarted)
+		{
+			if (worldController.finalevel == worldController.levelnumber)
+			{
+				Assets.instance.fonts.gameoverbig.draw(batch, "Final Level", x, y, 0, Align.center, true);
+			}
+			else Assets.instance.fonts.gameoverbig.draw(batch, "Level " + worldController.levelnumber, x, y, 0, Align.center, true);
+		 
+		}
+		else if (worldController.haswon() &&  !worldController.islastlevel())
+		{
+			 Assets.instance.fonts.gameoverbig.draw(batch, "LEVEL WON", x, y, 0, Align.center, true);
+			
+		}
+		else if (worldController.haswon() && worldController.islastlevel())
+		{
+			 Assets.instance.fonts.gameoverbig.draw(batch, "GAME WON", x, y, 0, Align.center, true);
+		
+		}
 	}
 
 	@Override

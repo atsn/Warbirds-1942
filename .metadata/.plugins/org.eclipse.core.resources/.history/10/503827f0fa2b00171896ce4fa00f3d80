@@ -1,0 +1,23 @@
+{
+	// probably better to construct islands using a random formula (ie proceduraly generated)  but this
+	// is here to show how it could be done manually.
+	islandseed: 965,
+		enemies: [
+		{	name: yellowEnemy,	x: 1,	y: 1,	rotation:  0, state:	0},
+		{	name: yellowEnemy,	x: 0,	y: 10,	rotation:  0, state:	0},
+		{	name: yellowEnemy,	x: 5,	y: 4,	rotation:  0, state:	0},
+		{	name: yellowEnemy,	x: -3,	y: -1,	rotation:  0, state:	0},
+		{	name: greenEnemy,	x: -2,	y: 15,	rotation:  0, state:	0},
+		{	name: whiteEnemy,	x: 2,	y: 2,	rotation:  0, state:	0},
+		{	name: greenEnemy,	x: -3,	y: 13,	rotation:  0, state:	0},
+		{	name: whiteEnemy,	x: -5,	y: 4,	rotation:  0, state:	0},
+		{	name: greenEnemy,	x: 5,	y: 3,	rotation:  0, state:	0},
+		{	name: whiteEnemy,	x: -4,	y: 15,	rotation:  0, state:	0},
+		{	name: greenEnemy,	x: -1,	y: 15,	rotation:  0, state:	0},
+		
+		
+	],
+	name: 1,
+	length: 20,
+	hasboss: true,
+}

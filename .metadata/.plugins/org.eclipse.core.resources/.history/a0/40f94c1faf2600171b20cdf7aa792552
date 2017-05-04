@@ -1,0 +1,79 @@
+package wit.cgd.warbirds.game.objects;
+
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas.TextureAtlasData.Region;
+
+import wit.cgd.warbirds.game.Assets;
+import wit.cgd.warbirds.game.WorldController;
+import wit.cgd.warbirds.game.Assets.Annimations;
+
+public class Drops extends AbstractGameObject
+{
+	boolean exploadoing = false;
+	TextureRegion region;
+	Animation animation;
+
+	public enum Droptype
+	{
+		ExtraLife, DubbleBullet, shield, bomb
+	}
+
+	public Droptype droptype;
+
+	public Drops(Level level, Droptype droptype)
+	{
+		super(level);
+		this.droptype = droptype;
+
+	}
+
+	@Override
+	public void render(SpriteBatch batch)
+	{
+		switch (droptype)
+		{
+		case ExtraLife:
+			region = Assets.instance.extralife.region;
+			break;
+		case DubbleBullet:
+			region = Assets.instance.doubleBullet.region;
+			break;
+		case shield:
+			region = Assets.instance.shield.region;
+			break;
+		case bomb:
+			region = Assets.instance.bomb.region;
+			break;
+
+		}
+		if (!exploadoing)
+		{
+			batch.draw(region.getTexture(), position.x, position.y, origin.x, origin.y, dimension.x, dimension.y, 1, 1, rotation, region.getRegionX(), region.getRegionY(), region.getRegionWidth(),
+					region.getRegionHeight(), false, false);
+
+		}
+		else
+		{
+			region = (TextureRegion) animation.getKeyFrame(stateTime, true);
+			batch.draw(region.getTexture(), position.x, position.y, origin.x, origin.y, dimension.x, dimension.y, 1, 1, rotation, region.getRegionX(), region.getRegionY(), region.getRegionWidth(),
+					region.getRegionHeight(), false, false);
+		}
+
+	}
+
+	public void gotpickedup()
+	{
+		if (droptype == Droptype.bomb)
+		{
+			animation = Assets.instance.explosionsmall.animation;
+			exploadoing = true;
+		}
+		else
+		{
+			level.drops.removeValue(this, true);
+		}
+	}
+
+}

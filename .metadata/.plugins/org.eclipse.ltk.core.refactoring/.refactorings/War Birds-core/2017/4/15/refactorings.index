@@ -1,0 +1,16 @@
+1491904219421	Rename type 'GreenEnemy'
+1491911410137	Rename field 'ishit'
+1491911511589	Rename field 'isplayerhit'
+1491926678683	Rename field 'greenenemies'
+1491930945077	Rename field 'ishit'
+1491981123502	Move compilation unit
+1491983156453	Rename field 'gameCountLabel'
+1491983176688	Rename field 'currentStreakLabel'
+1491983810773	Rename field 'firstPlayerSkillLabel'
+1491983846384	Rename field 'firstPlayerSkillSlider'
+1491987710130	Rename field 'Dificulity'
+1491990346223	Delete element
+1491991645159	Rename field 'menumusix'
+1491991663078	Rename field 'menumusiC'
+1491994661750	Rename field 'longestStreak'
+1492017364365	Rename type 'Powerup'

@@ -1,0 +1,22 @@
+{
+	// is here to show how it could be done manually.
+	islandseed: 965,
+		enemies: [
+		{	name: yellowEnemy,	x: -4,	y: 1,	rotation:  0, state:	0},
+		{	name: yellowEnemy,	x: -4,	y: 10,	rotation:  0, state:	0},
+		{	name: yellowEnemy,	x: -4,	y: 4,	rotation:  0, state:	0},
+		{	name: yellowEnemy,	x: -4,	y: -1,	rotation:  0, state:	0},
+		{	name: greenEnemy,	x: -4,	y: 15,	rotation:  0, state:	0},
+		{	name: whiteEnemy,	x: -4,	y: 2,	rotation:  0, state:	0},
+		{	name: greenEnemy,	x: 4,	y: 13,	rotation:  0, state:	0},
+		{	name: whiteEnemy,	x: 4,	y: 4,	rotation:  0, state:	0},
+		{	name: greenEnemy,	x: 4,	y: 3,	rotation:  0, state:	0},
+		{	name: whiteEnemy,	x: 4,	y: 15,	rotation:  0, state:	0},
+		{	name: greenEnemy,	x: 4,	y: 15,	rotation:  0, state:	0},
+		
+		
+	],
+	name: 1,
+	length: 20,
+	hasboss: false,
+}

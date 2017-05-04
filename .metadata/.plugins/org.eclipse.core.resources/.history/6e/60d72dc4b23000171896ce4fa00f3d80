@@ -1,0 +1,317 @@
+package wit.cgd.warbirds.game;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetDescriptor;
+import com.badlogic.gdx.assets.AssetErrorListener;
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.Animation.PlayMode;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Disposable;
+
+import wit.cgd.warbirds.game.util.Constants;
+
+public class Assets implements Disposable, AssetErrorListener
+{
+
+	public static final String TAG = Assets.class.getName();
+	public static final Assets instance = new Assets();
+
+	private AssetManager assetManager;
+
+	public AssetFonts fonts;
+
+	public AssetSounds sounds;
+	public AssetMusic music;
+
+	public AssetPlayer player;
+	public Asset bullet;
+	public Asset doubleBullet;
+	public Asset powerBullet;
+	public Asset extralife;
+	public Asset bomb;
+	public Asset shield;
+	public AssetLevelDecoration levelDecoration;
+	public Annimations explosionsmall;
+	public Annimations grenEnemy;
+	public Annimations whiteEnemy;
+	public Annimations blueEnemy;
+	public Annimations yellowEnemy;
+	public Annimations Smoke;
+	public Annimations boss;
+	public Annimations bossexplotion;
+
+	private Assets()
+	{}
+
+	public void init(AssetManager assetManager)
+	{
+
+		this.assetManager = assetManager;
+		assetManager.setErrorListener(this);
+
+		// load texture for game sprites
+		assetManager.load(Constants.TEXTURE_ATLAS_GAME, TextureAtlas.class);
+
+		assetManager.finishLoading();
+
+		TextureAtlas atlas = assetManager.get(Constants.TEXTURE_ATLAS_GAME);
+
+		// load sounds
+		assetManager.load("sounds/click01.wav", Sound.class);
+		assetManager.load("sounds/click02.wav", Sound.class);
+		assetManager.load("sounds/enemyshoot.wav", Sound.class);
+		assetManager.load("sounds/explosionlarge.wav", Sound.class);
+		assetManager.load("sounds/explosion.wav", Sound.class);
+		assetManager.load("sounds/playerbullet01.wav", Sound.class);
+		assetManager.load("sounds/playerhit.wav", Sound.class);
+		assetManager.load("sounds/shoot01.wav", Sound.class);
+		assetManager.load("sounds/shoot02.wav", Sound.class);
+		assetManager.load("sounds/shoot03.wav", Sound.class);
+		assetManager.load("sounds/shoot04.wav", Sound.class);
+		assetManager.load("sounds/shoot05.wav", Sound.class);
+		assetManager.load("sounds/shoot06.wav", Sound.class);
+		assetManager.load("sounds/shoot07.wav", Sound.class);
+		assetManager.load("sounds/warning.wav", Sound.class);
+		assetManager.load("sounds/bossComeInsound.wav", Sound.class);
+		assetManager.load("sounds/bossnottakindamagesound.wav", Sound.class);
+		
+		
+		
+		// load music
+		assetManager.load("music/GameMusic.mp3",Music.class);
+		assetManager.load("music/MenuMusic.mp3",Music.class);
+		// assetManager.load("music/FILENAME", Music.class);
+
+		assetManager.finishLoading();
+
+		Gdx.app.debug(TAG, "# of assets loaded: " + assetManager.getAssetNames().size);
+		for (String a : assetManager.getAssetNames())
+			Gdx.app.debug(TAG, "asset: " + a);
+
+		// create atlas for game sprites
+
+		for (Texture t : atlas.getTextures())
+			t.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+
+		fonts = new AssetFonts();
+
+		// create game resource objects
+		player = new AssetPlayer(atlas);
+		
+		
+		levelDecoration = new AssetLevelDecoration(atlas);
+		bullet = new Asset(atlas, "bulletSH");
+		doubleBullet = new Asset(atlas, "bullet_doubleSH");
+		powerBullet = new Asset(atlas, "powerBullet");
+		extralife = new Asset(atlas, "player");
+		shield = new Asset(atlas, "Shield");
+		bomb = new Asset(atlas, "bomb");
+		Smoke = new Annimations(atlas,"Smoke",PlayMode.LOOP);
+		boss = new Annimations(atlas, "Bossplane", PlayMode.LOOP);
+		bossexplotion = new Annimations(atlas, "bossexplosion", PlayMode.NORMAL);
+		grenEnemy = new Annimations(atlas,"enemy_plane_green",PlayMode.LOOP);
+		whiteEnemy = new Annimations(atlas, "enemy_plane_white", PlayMode.LOOP);
+		blueEnemy = new Annimations(atlas, "enemy_plane_bue", PlayMode.LOOP);
+		yellowEnemy = new Annimations(atlas, "enemy_plane_yellow", PlayMode.LOOP);
+		explosionsmall = new Annimations(atlas, "explosion_large", PlayMode.NORMAL);
+		
+
+		// create sound and music resource objects
+		sounds = new AssetSounds(assetManager);
+		 music = new AssetMusic(assetManager);
+
+	}
+
+	@Override
+	public void dispose()
+	{
+		assetManager.dispose();
+	}
+
+	@Override
+	public void error(AssetDescriptor asset, Throwable throwable)
+	{
+		Gdx.app.error(TAG, "Couldn't load asset '" + asset + "'", (Exception) throwable);
+	}
+
+	public class Asset
+	{
+		public final AtlasRegion region;
+
+		public Asset(TextureAtlas atlas, String imageName)
+		{
+			region = atlas.findRegion(imageName);
+			Gdx.app.log(TAG, "Loaded asset '" + imageName + "'");
+		}
+	}
+
+	public class AssetPlayer
+	{
+		public final AtlasRegion region;
+		public final Animation animationNormal;
+		public final Animation animationExplosionBig;
+
+		public AssetPlayer(TextureAtlas atlas)
+		{
+			region = atlas.findRegion("player");
+
+			Array<AtlasRegion> regions = atlas.findRegions("player");
+			animationNormal = new Animation(1.0f / 15.0f, regions, Animation.PlayMode.LOOP);
+			regions = atlas.findRegions("explosion_big");
+			animationExplosionBig = new Animation(1.0f / 15.0f, regions, Animation.PlayMode.LOOP);
+		}
+	}
+
+
+	public class AssetLevelDecoration
+	{
+
+		public final AtlasRegion islandBig;
+		public final AtlasRegion islandSmall;
+		public final AtlasRegion islandTiny;
+		public final AtlasRegion water;
+
+		public AssetLevelDecoration(TextureAtlas atlas)
+		{
+			water = atlas.findRegion("water");
+			islandBig = atlas.findRegion("island_big");
+			islandSmall = atlas.findRegion("island_small");
+			islandTiny = atlas.findRegion("island_tiny");
+		}
+	}
+
+	public class AssetFonts
+	{
+		public final BitmapFont defaultSmall;
+		public final BitmapFont defaultNormal;
+		public final BitmapFont defaultBig;
+		public final BitmapFont myFontSmall;
+		public final BitmapFont myFontNormal;
+		public final BitmapFont myFontMedium;
+		public final BitmapFont myFontBig;
+		
+		public final BitmapFont gameoversmall;
+		public final BitmapFont gameovernormal;
+		public final BitmapFont gameoverbig;
+		
+
+		public AssetFonts()
+		{
+			// create three fonts using Libgdx's built-in 15px bitmap font
+			defaultSmall = new BitmapFont(Gdx.files.internal("images/arial-15.fnt"), true);
+			defaultNormal = new BitmapFont(Gdx.files.internal("images/arial-15.fnt"), true);
+			defaultBig = new BitmapFont(Gdx.files.internal("images/arial-15.fnt"), true);
+			myFontSmall = new BitmapFont(Gdx.files.internal("images/myfont.fnt"), true);
+			myFontNormal = new BitmapFont(Gdx.files.internal("images/myfont.fnt"), true);
+			myFontMedium = new BitmapFont(Gdx.files.internal("images/myfont.fnt"), true);
+			myFontBig = new BitmapFont(Gdx.files.internal("images/myfont.fnt"), true);
+			gameoversmall = new BitmapFont(Gdx.files.internal("images/gameoverfont.fnt"), true);
+			gameovernormal = new BitmapFont(Gdx.files.internal("images/gameoverfont.fnt"), true);
+			gameoverbig = new BitmapFont(Gdx.files.internal("images/gameoverfont.fnt"), true);
+			
+			// set font sizes
+			defaultSmall.getData().setScale(0.75f);
+			defaultNormal.getData().setScale(1.0f);
+			defaultBig.getData().setScale(4.0f);
+			myFontSmall.getData().setScale(0.75f);
+			myFontNormal.getData().setScale(1.0f);
+			myFontMedium.getData().setScale(2.0f);
+			myFontBig.getData().setScale(4.0f);
+			
+			gameoversmall.getData().setScale(0.75f);
+			gameovernormal.getData().setScale(1.0f);
+			gameoverbig.getData().setScale(4.0f);
+			
+			// enable linear texture filtering for smooth fonts
+			defaultSmall.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
+			defaultNormal.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
+			defaultBig.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
+			myFontSmall.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
+			myFontNormal.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
+			myFontMedium.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
+			myFontBig.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
+			gameoversmall.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
+			gameovernormal.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
+			gameoverbig.getRegion().getTexture().setFilter(TextureFilter.Linear, TextureFilter.Linear);
+		}
+	}
+
+	public class AssetSounds
+	{
+
+		public final Sound click_1;
+		public final Sound click_2;
+		public final Sound enemy_shoot;
+		public final Sound explotion_large;
+		public final Sound exploation;
+		public final Sound player_bullet;
+		public final Sound playerhit;
+		public final Sound warning;
+		public final Sound shoot1;
+		public final Sound shoot2;
+		public final Sound shoot3;
+		public final Sound shoot4;
+		public final Sound shoot5;
+		public final Sound shoot6;
+		public final Sound shoot7;
+		public final Sound bosscomein;
+		public final Sound bossnottakindamagesound;
+
+		public AssetSounds(AssetManager am)
+		{
+			click_1 = am.get("sounds/click01.wav", Sound.class);
+			click_2 = am.get("sounds/click02.wav", Sound.class);
+			enemy_shoot = am.get("sounds/enemyshoot.wav", Sound.class);
+			explotion_large = am.get("sounds/explosionlarge.wav", Sound.class);
+			exploation = am.get("sounds/explosion.wav", Sound.class);
+			player_bullet = am.get("sounds/playerbullet01.wav", Sound.class);
+			playerhit = am.get("sounds/playerhit.wav", Sound.class);
+			warning = am.get("sounds/warning.wav", Sound.class);
+			shoot1 = am.get("sounds/shoot01.wav", Sound.class);
+			shoot2 = am.get("sounds/shoot02.wav", Sound.class);
+			shoot3 = am.get("sounds/shoot03.wav", Sound.class);
+			shoot4 = am.get("sounds/shoot04.wav", Sound.class);
+			shoot5 = am.get("sounds/shoot05.wav", Sound.class);
+			shoot6 = am.get("sounds/shoot06.wav", Sound.class);
+			shoot7 = am.get("sounds/shoot07.wav", Sound.class);
+			bosscomein = am.get("sounds/bossComeInsound.wav", Sound.class);
+			bossnottakindamagesound = am.get("sounds/bossnottakindamagesound.wav", Sound.class);
+			
+		}
+	}
+
+	public class Annimations
+	{
+
+		public final Animation animation;
+
+		public Annimations(TextureAtlas atlas,String region,Animation.PlayMode playMode)
+		{
+
+			Array<AtlasRegion> regions = atlas.findRegions(region);
+			animation = new Animation(1.0f / 15.0f, regions,playMode);
+		}
+	}
+
+	public class AssetMusic
+	{
+		 public final Music gamemusic;
+		 public final Music menumusic;
+
+		public AssetMusic(AssetManager am)
+		{
+			gamemusic = am.get("music/GameMusic.mp3",Music.class);
+			menumusic = am.get("music/MenuMusic.mp3",Music.class);
+			
+		}
+	}
+
+}

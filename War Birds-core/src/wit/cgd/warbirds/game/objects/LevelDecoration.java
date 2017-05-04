@@ -57,8 +57,6 @@ public class LevelDecoration extends AbstractGameObject
 	public void render(SpriteBatch batch)
 	{
 		TextureRegion region = water;
-		int t = (int) (Constants.VIEWPORT_HEIGHT * scale.x / scale.y);
-
 		// water
 		for (int k = (int) level.start; k < level.end; ++k)
 			for (int c = -((int) Constants.VIEWPORT_WIDTH / 2); c < (int) (Constants.VIEWPORT_WIDTH / 2); ++c)

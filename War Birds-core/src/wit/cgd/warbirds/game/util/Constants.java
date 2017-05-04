@@ -1,6 +1,13 @@
 package wit.cgd.warbirds.game.util;
 
+import java.util.Random;
+
 public class Constants {
+	// random
+	public static Random random  = new Random(System.currentTimeMillis());
+	// Game setting (preferences + stats) files
+	public static final String STATS = "game.stats";;
+	public static final String	PREFERENCES	= "game.prefs";
 
 	// Game world dimensions
 	public static final float	VIEWPORT_WIDTH		= 8.0f;
@@ -9,12 +16,19 @@ public class Constants {
 	// GUI dimensions
 	public static final float	VIEWPORT_GUI_WIDTH	= 480.0f;
 	public static final float	VIEWPORT_GUI_HEIGHT	= 800.0f;
+	
 
 	// atlas for all game sprites
 	public static final String	TEXTURE_ATLAS_GAME	= "images/game.atlas";
+	public static final String TEXTURE_ATLAS_UI = "images/ui.atlas";
 
+	// gui
+	public static final String SKIN_LIBGDX_UI = "images/uiskin.json";
+	public static final String TEXTURE_ATLAS_LIBGDX_UI = "images/uiskin.atlas";
+	public static final String SKIN_UI = "images/ui.json";
+	
 	// Persistent storage files
-	public static final String	PREFERENCES			= "game.prefs";
+
 
 	// Speed Constants (most relative to SCROLL_SPEED)
 	public static final float	SCROLL_SPEED		= 1.0f;
@@ -28,4 +42,6 @@ public class Constants {
 
 	public static final float	BULLET_DIE_DELAY	= 1.2f;
 	public static final float	ENEMY_DIE_DELAY		= 0.2f;
+	public static final float BUTTON_PAD = 5;
+	
 }

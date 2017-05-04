@@ -3,7 +3,6 @@ package wit.cgd.warbirds.game.objects;
 import wit.cgd.warbirds.game.Assets;
 import wit.cgd.warbirds.game.util.Constants;
 
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Pool.Poolable;
@@ -14,36 +13,105 @@ public class Bullet extends AbstractGameObject implements Poolable
 	public static final String TAG = Player.class.getName();
 
 	private TextureRegion region;
+	boolean isenemy;
 
-	Bullet(Level level)
+	public enum BulletType
 	{
-		super(level);
-		init();
+		normalBullet, DubbleBullet, powerBullet
 	}
 
-	public void init()
+	public BulletType bulletType;
+
+	Bullet(Level level, BulletType bulletType)
 	{
-		dimension.set(0.5f, 0.5f);
+		super(level);
+		init(bulletType);
+	}
 
-		region = Assets.instance.doubleBullet.region;
+	public float Getdamage()
+	{
+		switch (bulletType)
+		{
+		case normalBullet:
+			return 10;
+		case DubbleBullet:
+			return 20;
+		case powerBullet:
+			return 50;
+		}
 
+		return 0;
+	}
+
+	public void init(BulletType bulletType)
+	{
+		this.bulletType = bulletType;
+		isenemy = false;
+		dimension.set(0.16f, 0.4f);
+		
 		// Center image on game object
 		origin.set(dimension.x / 2, dimension.y / 2);
-
 		velocity.y = Constants.BULLET_SPEED;
+		
 	}
 
 	@Override
 	public void render(SpriteBatch batch)
 	{
-		batch.draw(region.getTexture(), position.x - origin.x, position.y - origin.y, origin.x, origin.y, dimension.x, dimension.y, scale.x, scale.y, rotation, region.getRegionX(),
-				region.getRegionY(), region.getRegionWidth(), region.getRegionHeight(), false, false);
+		switch (this.bulletType)
+		{
+		case normalBullet:
+			region = Assets.instance.bullet.region;
+			break;
+		case DubbleBullet:
+			region = Assets.instance.doubleBullet.region;
+			break;
+		case powerBullet:
+			region = Assets.instance.powerBullet.region;
+			break;
+		}
+		
+		batch.draw(region.getTexture(), position.x, position.y, origin.x, origin.y, dimension.x, dimension.y, 1, 1, rotation, region.getRegionX(), region.getRegionY(), region.getRegionWidth(),
+				region.getRegionHeight(), false, false);
 	}
 
 	@Override
 	public void reset()
 	{
-		System.out.println("sdfsd");
 		state = State.ACTIVE;
+	}
+
+	public void setbulletype(BulletType bulletType)
+	{
+		this.bulletType = bulletType;
+		switch (this.bulletType)
+		{
+		case powerBullet:
+			dimension.set(0.5f, 0.5f);
+			break;
+		case normalBullet:
+			dimension.set(0.12f, 0.35f);
+			break;
+		case DubbleBullet:
+			dimension.set(0.4f, 0.35f);
+			break;
+		}
+		origin.set(dimension.x / 2, dimension.y / 2);
+	}
+
+	public void setrotation(float degrees)
+	{
+		this.rotation = degrees;
+		this.velocity.setAngle(rotation - 90).nor().scl(8);
+	}
+
+	@Override
+	public void update(float deltaTime)
+	{
+		if (!isInScreen())
+		{
+			this.state = State.DEAD;
+		}
+		super.update(deltaTime);
 	}
 }

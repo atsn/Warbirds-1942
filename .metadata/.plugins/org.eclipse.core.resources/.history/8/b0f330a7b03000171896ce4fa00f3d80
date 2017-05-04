@@ -1,0 +1,37 @@
+{
+// all green and yellow enemy´s must be spawn between x -4 and x 3.
+	islandseed: 7599,
+		enemies: [	
+		{	name: whiteEnemy,	x:  1,	y: 19,	rotation:  0, state:	0},
+		{	name: whiteEnemy,	x: 2,	y: 19,	rotation:  0, state:	0},
+		{	name: whiteEnemy,	x: 3,	y: 19,	rotation:  0, state:	0},
+		{	name: whiteEnemy,	x: -1,	y: 19,	rotation:  0, state:	0},
+		{	name: whiteEnemy,	x: -0,	y: 19,	rotation:  0, state:	0},
+
+		
+		{	name: yellowEnemy,	x: 3,	y: 9,	rotation:  0, state:	0},
+		{	name: yellowEnemy,	x: 2,	y: 14,	rotation:  0, state:	0},
+		{	name: yellowEnemy,	x: 1,	y: 15,	rotation:  0, state:	0},
+		{	name: yellowEnemy,	x: 3,	y: 16,	rotation:  0, state:	0},
+		{	name: yellowEnemy,	x: 2,	y: 27,	rotation:  0, state:	0},
+		{	name: yellowEnemy,	x: 3,	y: 7,	rotation:  0, state:	0},
+		{	name: yellowEnemy,	x: -4,	y: 25,	rotation:  0, state:	0},
+		{	name: yellowEnemy,	x: -3,	y: 29,	rotation:  0, state:	0},
+		{	name: yellowEnemy,	x: -4,	y: 20,	rotation:  0, state:	0},
+		{	name: yellowEnemy,	x: -3,	y: 25,	rotation:  0, state:	0},
+		{	name: yellowEnemy,	x: -2,	y: 27,	rotation:  0, state:	0},
+		{	name: yellowEnemy,	x: -3,	y: 29,	rotation:  0, state:	0},
+		
+
+		{	name: greenEnemy,	x: 3,	y: 7,	rotation:  0, state:	0},
+		{	name: greenEnemy,	x: 0,	y: 15,	rotation:  0, state:	0},
+		{	name: greenEnemy,	x: 2,	y: 27,	rotation:  0, state:	0},
+		{	name: greenEnemy,	x: 1,	y: 3,	rotation:  0, state:	0},
+		
+		{	name: blueEnemy,	x: 2,	y: 10,	rotation:  0, state:	0},
+		{	name: blueEnemy,	x: 1,	y: 10,	rotation:  0, state:	0},
+	],
+	name: 6,
+	length: 30,
+	hasboss: true,
+}

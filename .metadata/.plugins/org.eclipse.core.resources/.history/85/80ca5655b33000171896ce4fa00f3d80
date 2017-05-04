@@ -1,0 +1,535 @@
+package wit.cgd.warbirds.game;
+
+import com.badlogic.gdx.Application.ApplicationType;
+import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Polygon;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.InputAdapter;
+import wit.cgd.warbirds.game.enemies.Enemy;
+import wit.cgd.warbirds.game.objects.AbstractGameObject;
+import wit.cgd.warbirds.game.objects.AbstractGameObject.State;
+import wit.cgd.warbirds.game.objects.Bullet;
+import wit.cgd.warbirds.game.objects.Bullet.BulletType;
+import wit.cgd.warbirds.game.objects.Drops;
+import wit.cgd.warbirds.game.objects.Level;
+import wit.cgd.warbirds.game.screens.MenuScreen;
+import wit.cgd.warbirds.game.util.AudioManager;
+import wit.cgd.warbirds.game.util.CameraHelper;
+import wit.cgd.warbirds.game.util.Constants;
+import wit.cgd.warbirds.game.util.GameStats;
+
+public class WorldController extends InputAdapter
+{
+
+	private Rectangle r1 = new Rectangle();
+	private Rectangle r2 = new Rectangle();
+	public boolean isplayerdead;
+	private Game game;
+	public CameraHelper cameraHelper;
+	public Level level;
+	public float gameovertime;
+	public float levelJusStartettime;
+	public int lives;
+	boolean haslostlife;
+	boolean levelJustStarted;
+	int levelnumber;
+	final int finalevel = 7;
+
+	public WorldController(Game game)
+	{
+		lives = 3;
+		this.game = game;
+		levelnumber = 1;
+		init();
+
+	}
+
+	private void init()
+	{
+		Gdx.input.setInputProcessor(this);
+
+		levelJusStartettime = 0;
+		levelJustStarted = true;
+		if (levelnumber > finalevel)
+		{
+			GameStats.instance.save();
+			game.setScreen(new MenuScreen(game));
+			return;
+		}
+		if (levelnumber != 1)
+		{
+			BulletType bulletType = level.player.getbulletype();
+			level = new Level(levelnumber);
+			while (level.player.getbulletype() != bulletType)
+			{
+				level.player.UpradeBullet();
+			}
+		}
+		else
+		{
+			level = new Level(levelnumber);
+		}
+
+		cameraHelper = new CameraHelper();
+		cameraHelper.setTarget(level);
+		gameovertime = 3;
+		isplayerdead = false;
+		haslostlife = false;
+	}
+
+	public void update(float deltaTime)
+	{
+		handleDebugInput(deltaTime);
+		handleGameInput(deltaTime);
+		cameraHelper.update(deltaTime);
+		level.update(deltaTime);
+		cullObjects();
+		checkBulletEnemyCollision();
+		checkEnemyBulletPlayerCollision();
+		checkEnemyPlayerCollision();
+		checkDropPlayerCollision();
+
+		if (isplayerdead)
+		{
+
+			if (!haslostlife)
+			{
+				lives--;
+				haslostlife = true;
+			}
+
+			gameovertime -= deltaTime;
+			if (gameovertime < 0)
+			{
+
+				if (isgameover())
+				{
+					GameStats.instance.save();
+					game.setScreen(new MenuScreen(game));
+				}
+				else init();
+			}
+		}
+
+		if (levelJustStarted)
+		{
+
+			levelJusStartettime += deltaTime;
+			if (levelJusStartettime > 1.5f)
+			{
+				levelJustStarted = false;
+			}
+		}
+
+		if (haswon())
+		{
+			gameovertime -= deltaTime;
+			if (gameovertime < 0)
+			{
+				levelnumber++;
+				init();
+			}
+		}
+	}
+
+	/**
+	 * Remove object because they are out of screen bounds or because they have
+	 * died
+	 */
+	public void cullObjects()
+	{
+
+		// cull bullets
+		for (int k = level.bullets.size; --k >= 0;)
+		{ // traverse array backwards !!!
+			Bullet it = level.bullets.get(k);
+			if (it.state == Bullet.State.DEAD)
+			{
+				level.bullets.removeIndex(k);
+				level.bulletPool.free(it);
+			}
+			else if (it.state == Bullet.State.ACTIVE && !isInScreen(it))
+			{
+				it.state = Bullet.State.DYING;
+				it.timeToDie = Constants.BULLET_DIE_DELAY;
+			}
+		}
+
+		for (int k = level.enemybullets.size; --k >= 0;)
+		{ // traverse array backwards !!!
+			Bullet it = level.enemybullets.get(k);
+			if (it.state == Bullet.State.DEAD)
+			{
+				level.enemybullets.removeIndex(k);
+				level.enemybulletPool.free(it);
+			}
+			else if (it.state == Bullet.State.ACTIVE && !isInScreen(it))
+			{
+				it.state = Bullet.State.DYING;
+				it.timeToDie = Constants.BULLET_DIE_DELAY;
+			}
+		}
+	}
+
+	// Collision detection methods
+	public void checkBulletEnemyCollision()
+	{
+		for (Enemy enemy : level.enemies)
+		{
+			r1.set(enemy.position.x, enemy.position.y, enemy.dimension.x, enemy.dimension.y);
+
+			Rectangle bounds = r1;
+			Polygon polygon = new Polygon(new float[] { 0, 0, bounds.width, 0, bounds.width, bounds.height, 0, bounds.height });
+			polygon.setPosition(enemy.position.x, enemy.position.y);
+			polygon.setOrigin(enemy.origin.x, enemy.origin.y);
+			polygon.setRotation(enemy.rotation);
+
+			for (Bullet bullet : level.bullets)
+			{
+				r2.set(bullet.position.x, bullet.position.y, bullet.dimension.x, bullet.dimension.y);
+
+				Rectangle bounds2 = r2;
+				Polygon polygon2 = new Polygon(new float[] { 0, 0, bounds2.width, 0, bounds2.width, bounds2.height, 0, bounds2.height });
+				polygon2.setPosition(bullet.position.x, bullet.position.y);
+				polygon2.setOrigin(bullet.origin.x, bullet.origin.y);
+
+				if (Intersector.overlapConvexPolygons(polygon, polygon2))
+				{
+					bullet.state = State.DEAD;
+					enemy.hit(bullet.Getdamage());
+				}
+			}
+		}
+
+		if (level.bosspawned)
+		{
+
+			r1.set(level.boss.position.x, level.boss.position.y, level.boss.dimension.x, level.boss.dimension.y);
+
+			Rectangle bounds = r1;
+			Polygon polygon = new Polygon(new float[] { 0, 0, bounds.width, 0, bounds.width, bounds.height, 0, bounds.height });
+			polygon.setPosition(level.boss.position.x, level.boss.position.y);
+			polygon.setOrigin(level.boss.origin.x, level.boss.origin.y);
+			polygon.setRotation(level.boss.rotation);
+
+			for (Bullet bullet : level.bullets)
+			{
+				r2.set(bullet.position.x, bullet.position.y, bullet.dimension.x, bullet.dimension.y);
+
+				Rectangle bounds2 = r2;
+				Polygon polygon2 = new Polygon(new float[] { 0, 0, bounds2.width, 0, bounds2.width, bounds2.height, 0, bounds2.height });
+				polygon2.setPosition(bullet.position.x, bullet.position.y);
+				polygon2.setOrigin(bullet.origin.x, bullet.origin.y);
+
+				if (Intersector.overlapConvexPolygons(polygon, polygon2))
+				{
+					level.boss.hit(bullet.Getdamage());
+					bullet.state = State.DEAD;
+				}
+			}
+		}
+	}
+
+	public void checkEnemyBulletPlayerCollision()
+	{
+
+		r1.set(level.player.position.x, level.player.position.y, level.player.dimension.x, level.player.dimension.y);
+
+		Rectangle bounds = r1;
+		Polygon polygon = new Polygon(new float[] { 0, 0, bounds.width, 0, bounds.width, bounds.height, 0, bounds.height });
+		polygon.setPosition(level.player.position.x, level.player.position.y);
+		polygon.setOrigin(level.player.origin.x, level.player.origin.y);
+
+		for (Bullet bullet : level.enemybullets)
+		{
+			r2.set(bullet.position.x, bullet.position.y, bullet.dimension.x, bullet.dimension.y);
+
+			Rectangle bounds2 = r2;
+			Polygon polygon2 = new Polygon(new float[] { 0, 0, bounds2.width, 0, bounds2.width, bounds2.height, 0, bounds2.height });
+			polygon2.setPosition(bullet.position.x, bullet.position.y);
+			polygon2.setOrigin(bullet.origin.x, bullet.origin.y);
+
+			if (Intersector.overlapConvexPolygons(polygon, polygon2))
+			{
+				AudioManager.instance.play(Assets.instance.sounds.click_2);
+				level.player.hit(bullet.Getdamage());
+				bullet.state = State.DEAD;
+				isplayerdead = level.player.isdead;
+				if (isplayerdead)
+				{
+					level.velocity.y = 0;
+				}
+
+			}
+		}
+
+	}
+
+	public void checkDropPlayerCollision()
+	{
+
+		r1.set(level.player.position.x, level.player.position.y, level.player.dimension.x, level.player.dimension.y);
+
+		Rectangle bounds = r1;
+		Polygon polygon = new Polygon(new float[] { 0, 0, bounds.width, 0, bounds.width, bounds.height, 0, bounds.height });
+		polygon.setPosition(level.player.position.x, level.player.position.y);
+		polygon.setOrigin(level.player.origin.x, level.player.origin.y);
+
+		for (Drops drops : level.drops)
+		{
+
+			r2.set(drops.position.x, drops.position.y, drops.dimension.x, drops.dimension.y);
+
+			Rectangle bounds2 = r2;
+			Polygon polygon2 = new Polygon(new float[] { 0, 0, bounds2.width, 0, bounds2.width, bounds2.height, 0, bounds2.height });
+			polygon2.setPosition(drops.position.x, drops.position.y);
+			polygon2.setOrigin(drops.origin.x, drops.origin.y);
+
+			if (Intersector.overlapConvexPolygons(polygon, polygon2))
+			{
+				switch (drops.droptype)
+				{
+				case ExtraLife:
+					if (lives < 3)
+					{
+						lives++;
+					}
+					break;
+				case DubbleBullet:
+					level.player.UpradeBullet();
+					break;
+				case shield:
+					level.player.setshield();
+					break;
+				case bomb:
+					if (!drops.exploadoing)
+					{
+						level.player.hit(30);
+
+					}
+					break;
+
+				}
+				drops.gotpickedup();
+			}
+		}
+
+	}
+
+	public void checkEnemyPlayerCollision()
+	{
+		r2.set(level.player.position.x, level.player.position.y, level.player.dimension.x, level.player.dimension.y);
+
+		Rectangle bounds2 = r2;
+		Polygon polygon2 = new Polygon(new float[] { 0, 0, bounds2.width, 0, bounds2.width, bounds2.height, 0, bounds2.height });
+		polygon2.setPosition(level.player.position.x, level.player.position.y);
+		polygon2.setOrigin(level.player.origin.x, level.player.origin.y);
+
+		for (Enemy enemy : level.enemies)
+		{
+			r1.set(enemy.position.x, enemy.position.y, enemy.dimension.x, enemy.dimension.y);
+
+			Rectangle bounds = r1;
+			Polygon polygon = new Polygon(new float[] { 0, 0, bounds.width, 0, bounds.width, bounds.height, 0, bounds.height });
+			polygon.setPosition(enemy.position.x, enemy.position.y);
+			polygon.setOrigin(enemy.origin.x, enemy.origin.y);
+			polygon.setRotation(enemy.rotation);
+
+			if (Intersector.overlapConvexPolygons(polygon, polygon2))
+			{
+				enemy.die();
+				level.player.die();
+				isplayerdead = true;
+				level.velocity.y = 0;
+			}
+
+		}
+		if (level.bosspawned)
+		{
+
+			r1.set(level.boss.position.x, level.boss.position.y, level.boss.dimension.x, level.boss.dimension.y);
+
+			Rectangle bounds = r1;
+			Polygon polygon = new Polygon(new float[] { 0, 0, bounds.width, 0, bounds.width, bounds.height, 0, bounds.height });
+			polygon.setPosition(level.boss.position.x, level.boss.position.y);
+			polygon.setOrigin(level.boss.origin.x, level.boss.origin.y);
+			polygon.setRotation(level.boss.rotation);
+
+			if (Intersector.overlapConvexPolygons(polygon, polygon2))
+			{
+				level.player.die();
+				isplayerdead = true;
+				level.velocity.y = 0;
+			}
+		}
+	}
+
+	public boolean isInScreen(AbstractGameObject obj)
+	{
+		return ((obj.position.x >= -Constants.VIEWPORT_WIDTH / 2 && obj.position.x <= Constants.VIEWPORT_WIDTH / 2) && (obj.position.y >= level.start && obj.position.y <= level.end));
+	}
+
+	public boolean haswon()
+	{
+
+		for (Enemy enemy : level.enemies)
+		{
+			if (enemy.isInScreen())
+			{
+				return false;
+			}
+		}
+
+		if (level.hasboss)
+		{
+			if (!level.bosspawned)
+			{
+				return false;
+			}
+			if (!level.boss.isdead)
+			{
+				return false;
+			}
+		}
+
+		if (isplayerdead || level.end < level.levelend)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	public boolean isgameover()
+	{
+		return lives <= 0;
+	}
+
+	public boolean islastlevel()
+	{
+		return levelnumber == finalevel;
+	}
+
+	@Override
+	public boolean keyUp(int keycode)
+	{
+		if (keycode == Keys.ESCAPE || keycode == Keys.BACK)
+		{
+			Gdx.app.exit();
+		}
+		return false;
+	}
+
+	private void handleGameInput(float deltaTime)
+	{
+		if (!isplayerdead)
+		{
+
+			if (Gdx.input.isKeyPressed(Keys.A))
+			{
+				level.player.velocity.x = -Constants.PLANE_H_SPEED;
+			}
+			else if (Gdx.input.isKeyPressed(Keys.D))
+			{
+				level.player.velocity.x = Constants.PLANE_H_SPEED;
+			}
+			else
+			{
+				level.player.velocity.x = 0;
+			}
+			if (Gdx.input.isKeyPressed(Keys.W))
+			{
+				level.player.velocity.y = Constants.PLANE_MAX_V_SPEED;
+			}
+			else if (Gdx.input.isKeyPressed(Keys.S))
+			{
+				level.player.velocity.y = Constants.PLANE_MIN_V_SPEED;
+			}
+			else
+			{
+				if (level.end < level.levelend)
+				{
+					level.player.velocity.y = Constants.SCROLL_SPEED;
+				}
+
+				else level.player.velocity.y = 0;
+
+			}
+			if (Gdx.input.isKeyPressed(Keys.SPACE))
+			{
+				level.player.shoot();
+			}
+		}
+	}
+
+	private void handleDebugInput(float deltaTime)
+	{
+		if (Gdx.app.getType() != ApplicationType.Desktop) return;
+
+		if (Gdx.input.isKeyPressed(Keys.ENTER))
+		{
+			cameraHelper.setTarget(!cameraHelper.hasTarget() ? level : null);
+		}
+
+		if (!cameraHelper.hasTarget())
+		{
+			// Camera Controls (move)
+			float camMoveSpeed = 5 * deltaTime;
+			float camMoveSpeedAccelerationFactor = 5;
+			if (Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)) camMoveSpeed *= camMoveSpeedAccelerationFactor;
+			if (Gdx.input.isKeyPressed(Keys.LEFT)) moveCamera(-camMoveSpeed, 0);
+			if (Gdx.input.isKeyPressed(Keys.RIGHT)) moveCamera(camMoveSpeed, 0);
+			if (Gdx.input.isKeyPressed(Keys.UP)) moveCamera(0, camMoveSpeed);
+			if (Gdx.input.isKeyPressed(Keys.DOWN)) moveCamera(0, -camMoveSpeed);
+			if (Gdx.input.isKeyPressed(Keys.BACKSPACE)) cameraHelper.reset();
+		}
+
+		// Camera Controls (zoom)
+		float camZoomSpeed = 1 * deltaTime;
+		float camZoomSpeedAccelerationFactor = 5;
+		if (Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)) camZoomSpeed *= camZoomSpeedAccelerationFactor;
+		if (Gdx.input.isKeyPressed(Keys.COMMA)) cameraHelper.addZoom(camZoomSpeed);
+		if (Gdx.input.isKeyPressed(Keys.PERIOD)) cameraHelper.addZoom(-camZoomSpeed);
+		if (Gdx.input.isKeyPressed(Keys.SLASH)) cameraHelper.setZoom(1);
+		if (Gdx.input.isKeyPressed(Keys.K)) init();
+		if (Gdx.input.isKeyJustPressed(Keys.P))	level.player.setshield();
+		if (Gdx.input.isKeyJustPressed(Keys.B))	level.player.UpradeBullet();
+		if (Gdx.input.isKeyJustPressed(Keys.L))	lives++;
+		if (Gdx.input.isKeyJustPressed(Keys.N))
+		{
+			levelnumber++;
+			init();
+		}
+		
+		if (Gdx.input.isKeyPressed(Keys.J))
+		{
+			if (!level.bosspawned)
+			{
+				level.position.y = level.levelend - 10;
+				for (Enemy enemy : level.enemies)
+				{
+					enemy.die();
+				}
+			}
+
+		}
+	}
+
+	private void moveCamera(float x, float y)
+	{
+		x += cameraHelper.getPosition().x;
+		y += cameraHelper.getPosition().y;
+		cameraHelper.setPosition(x, y);
+	}
+
+	@Override
+	public boolean touchDown(int screenX, int screenY, int pointer, int button)
+	{
+
+		// TODO - implement touch pad type controls
+		return true;
+	}
+
+}

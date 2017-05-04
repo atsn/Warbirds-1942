@@ -1,0 +1,10 @@
+{
+	// probably better to construct islands using a random formula (ie proceduraly generated)  but this
+	// is here to show how it could be done manually.
+	islandseed: 965,
+		enemies: [	
+	],
+	name: 1,
+	length: 5,
+	hasboss: false,
+}

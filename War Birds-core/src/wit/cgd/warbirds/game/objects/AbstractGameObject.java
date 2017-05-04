@@ -5,7 +5,6 @@ import wit.cgd.warbirds.game.util.Constants;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Pool.Poolable;
 
 public abstract class AbstractGameObject
 {
@@ -78,7 +77,7 @@ public abstract class AbstractGameObject
 		this.animation = animation;
 		stateTime = 0;
 	}
-
+	
 	public abstract void render(SpriteBatch batch);
 
 	protected void updateMotionX(float deltaTime)
@@ -89,7 +88,7 @@ public abstract class AbstractGameObject
 
 	public boolean isInScreen()
 	{
-		return ((position.x > -Constants.VIEWPORT_WIDTH / 2 && position.x < Constants.VIEWPORT_WIDTH / 2) && (position.y > level.start && position.y < level.end));
+		return ((position.x+1 > -Constants.VIEWPORT_WIDTH / 2 && position.x < Constants.VIEWPORT_WIDTH / 2) && (position.y > level.start && position.y < level.end));
 
 	}
 }

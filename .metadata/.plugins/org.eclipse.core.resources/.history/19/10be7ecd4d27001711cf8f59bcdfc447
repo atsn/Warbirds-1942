@@ -1,0 +1,351 @@
+package wit.cgd.warbirds.game.enemies;
+
+import java.sql.Date;
+import java.util.Random;
+
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Intersector;
+import com.badlogic.gdx.math.Polygon;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
+
+import wit.cgd.warbirds.game.Assets;
+import wit.cgd.warbirds.game.objects.Level;
+import wit.cgd.warbirds.game.objects.Player;
+import wit.cgd.warbirds.game.objects.AbstractGameObject;
+import wit.cgd.warbirds.game.objects.Bullet;
+import wit.cgd.warbirds.game.objects.Bullet.BulletType;
+import wit.cgd.warbirds.game.objects.Drops;
+import wit.cgd.warbirds.game.objects.Drops.Droptype;
+import wit.cgd.warbirds.game.objects.AbstractGameObject.State;
+import wit.cgd.warbirds.game.util.AudioManager;
+import wit.cgd.warbirds.game.util.Constants;
+import wit.cgd.warbirds.game.util.GameStats;
+
+public class Enemy extends AbstractGameObject
+{
+
+	private float timeShootDelay;
+	private boolean isdead = false;
+	float deathtime = 0;
+	float life;
+	float maxlife;
+	Polygon polygon;
+	boolean hasleftscreen;
+	boolean hasbenninscreen;
+	float outofscreentimer;
+	Bullet.BulletType bulletType;
+
+	public enum Enemytype
+	{
+		greenEnemy, yellowEnemy, blueEnemy, whiteEnemy
+	}
+
+	public Enemytype MyType;
+
+	public Enemy(Level level, Enemytype enemytype)
+	{
+		super(level);
+		init(level, enemytype);
+
+	}
+
+	public void init(Level level, Enemytype enemytype)
+	{
+		outofscreentimer = 3;
+		hasbenninscreen = false;
+		hasleftscreen = false;
+		MyType = enemytype;
+		dimension.scl(0.8f);
+		bulletType = BulletType.normalBullet;
+		switch (enemytype)
+		{
+		case greenEnemy:
+			super.animation = Assets.instance.grenEnemy.animation;
+			bulletType = BulletType.powerBullet;
+			maxlife = 50;
+			break;
+		case yellowEnemy:
+			maxlife = 11;
+			super.animation = Assets.instance.yellowEnemy.animation;
+			break;
+		case blueEnemy:
+			bulletType = bulletType.DubbleBullet;
+			maxlife = 21;
+			super.animation = Assets.instance.blueEnemy.animation;
+			break;
+		case whiteEnemy:
+			maxlife = 10;
+			super.animation = Assets.instance.whiteEnemy.animation;
+			break;
+
+		}
+
+		super.setAnimation(animation);
+		state = State.ACTIVE;
+		timeShootDelay = 0;
+
+		life = maxlife;
+
+	}
+
+	@Override
+	public void update(float deltaTime)
+	{
+		if (position.y < level.end)
+		{
+
+			if (isdead)
+			{
+				deathtime = deathtime - deltaTime;
+				if (deathtime < 0)
+				{
+					for (int i = 0; i < level.enemies.size; i++)
+					{
+						if (level.enemies.get(i) == this)
+						{
+							level.enemies.removeIndex(i);
+							break;
+						}
+					}
+				}
+
+			}
+			super.update(deltaTime);
+			origin.x = this.dimension.x / 2;
+			origin.y = this.dimension.y / 2;
+
+			timeShootDelay = timeShootDelay - deltaTime;
+			if (rotation >= 360)
+			{
+				rotation = 0;
+			}
+
+			if (!isdead) Ai(deltaTime);
+		}
+	}
+
+	@Override
+	public void render(SpriteBatch batch)
+	{
+		if (isInScreen())
+		{
+
+			TextureRegion region = (TextureRegion) animation.getKeyFrame(stateTime, true);
+
+			batch.draw(region.getTexture(), position.x, position.y, origin.x, origin.y, dimension.x, dimension.y, 1, 1, rotation, region.getRegionX(), region.getRegionY(), region.getRegionWidth(),
+					region.getRegionHeight(), false, false);
+
+		}
+	}
+
+	public void hit(float damage)
+	{
+		life = life - damage;
+		AudioManager.instance.play(Assets.instance.sounds.click_2);
+		if (life <= 0)
+		{
+			die();
+		}
+	}
+
+	public void die()
+	{
+		if (!isdead)
+		{
+			AudioManager.instance.play(Assets.instance.sounds.playerhit);
+			deathtime = 1.5f;
+			isdead = true;
+			animation = Assets.instance.explosionsmall.animation;
+			animation.setPlayMode(Animation.PlayMode.NORMAL);
+			super.setAnimation(animation);
+			AudioManager.instance.play(Assets.instance.sounds.exploation);
+			GameStats.instance.addtoscore(100);
+
+			float rand = Constants.random.nextFloat();
+			{
+				System.out.print(rand + "\n");
+				if (rand > 0.33)
+				{
+					return;
+				}
+
+				else
+				{
+					rand = Constants.random.nextFloat();
+					Drops drop = null;
+
+					if (rand > 0.75) drop = new Drops(level, Droptype.ExtraLife);
+					else if (rand > 0.5) drop = new Drops(level, Droptype.shield);
+					else if (rand > 0.25) drop = new Drops(level, Droptype.bomb);
+					else if (rand > 0.0) drop = new Drops(level, Droptype.DubbleBullet);
+
+					drop.position.x = position.x;
+					drop.position.y = position.y;
+					level.drops.add(drop);
+				}
+			}
+		}
+	}
+
+	public void shoot(Vector2 position)
+	{
+		// this.rotation = this.rotation + 1;
+		if (timeShootDelay > 0 || isdead || level.enemybullets.size > 5) return;
+
+		// get bullet
+		Bullet bullet = level.enemybulletPool.obtain();
+		bullet.reset();
+		bullet.setrotation(rotation);
+		bullet.position.set(position.x + origin.x - bullet.origin.x, position.y + origin.y - bullet.origin.y);
+		bullet.level = this.level;
+		bullet.setbulletype(bulletType);
+
+		level.enemybullets.add(bullet);
+		timeShootDelay = Constants.PLAYER_SHOOT_DELAY + 1 + Constants.random.nextFloat();
+		// AudioManager.instance.play(Assets.instance.sounds.player_bullet);
+	}
+
+	private void Ai(float deletatime)
+	{
+		if (MyType == Enemytype.blueEnemy)
+		{
+			if (!hasbenninscreen)
+			{
+				if (position.x > 4)
+				{
+					position.y = position.y - terminalVelocity.y * 2;
+					position.x = position.x - terminalVelocity.x * 5;
+				}
+				else{
+					position.y = position.y -terminalVelocity.y * 2;
+					position.x = position.x + terminalVelocity.x * 5;
+					
+				}
+				
+				outofscreentimer = outofscreentimer - deletatime;
+				if (isInScreen() && outofscreentimer < 2)
+				{
+					outofscreentimer = 3;
+					hasbenninscreen = true;
+				}
+			}
+			else if (isInScreen() && !hasleftscreen)
+			{
+				if (position.x > 6)
+				{
+					position.y = position.y  -terminalVelocity.y * 2;
+					position.x = position.x - terminalVelocity.x * 5;
+				}
+				else{
+					position.y = position.y - terminalVelocity.y * 2;
+					position.x = position.x + terminalVelocity.x * 5;
+					
+				}
+			}
+
+			else if (!isInScreen() && !hasleftscreen)
+			{
+				hasleftscreen = true;
+				velocity.x = 0;
+				velocity.y = 0;
+			}
+			else if (hasleftscreen)
+			{
+				outofscreentimer = outofscreentimer - deletatime;
+
+				if (outofscreentimer < 0)
+				{
+					velocity.x = terminalVelocity.x;
+					velocity.y = 1f;
+					for (int i = 0; i < 10; i++)
+					{
+						rotation = rotation + GetDirection();
+					}
+					velocity.setAngle(rotation - 90).nor().scl(2);
+				}
+			}
+
+		}
+		if (MyType == Enemytype.greenEnemy)
+		{
+
+			position.y = position.y + 0.01f;
+			shoot(position);
+		}
+		if (MyType == Enemytype.whiteEnemy)
+		{
+			velocity.y = 0.3f;
+			for (int i = 0; i < 10; i++)
+			{
+				rotation = rotation + GetDirection();
+			}
+			velocity.setAngle(rotation - 90).nor().scl(2);
+		}
+		if (MyType == Enemytype.yellowEnemy)
+		{
+
+			for (int i = 0; i < 10; i++)
+			{
+				rotation = rotation + GetDirection();
+			}
+			shoot(position);
+		}
+
+	}
+
+	private int GetDirection()
+	{
+
+		for (int i = (int) rotation; i < rotation + 180; i++)
+		{
+			if (tjeckhit(i))
+			{
+				return -1;
+			}
+
+		}
+
+		for (int i = (int) rotation; i > rotation - 180; i--)
+		{
+
+			if (tjeckhit(i))
+			{
+				return 1;
+			}
+		}
+
+		return 0;
+	}
+
+	private boolean tjeckhit(int i)
+	{
+		Rectangle r1 = new Rectangle();
+		Rectangle r2 = new Rectangle();
+
+		r1.set(position.x, position.y, 0.1f, 50f);
+
+		Rectangle bounds = r1;
+		polygon = new Polygon(new float[] { 0, 0, bounds.width, 0, bounds.width, bounds.height, 0, bounds.height });
+		polygon.setPosition(position.x, position.y);
+		polygon.setOrigin(origin.x, origin.y);
+		polygon.setRotation(i);
+
+		r2.set(0, 0, level.player.dimension.x, level.player.dimension.y);
+
+		Rectangle bounds2 = r2;
+		Polygon polygon2 = new Polygon(new float[] { 0, 0, bounds2.width, 0, bounds2.width, bounds2.height, 0, bounds2.height });
+		polygon2.setPosition(level.player.position.x, level.player.position.y);
+		polygon2.setOrigin(level.player.origin.x, level.player.origin.y);
+
+		if (Intersector.overlapConvexPolygons(polygon, polygon2))
+		{
+			return true;
+		}
+
+		return false;
+
+	}
+}
